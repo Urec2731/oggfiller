@@ -3,6 +3,7 @@
  */
 var express = require('express');
 var app = express();
+var config = require('./config01.json');
 
 app.use(allowCrossDomain);
 
