@@ -4,6 +4,13 @@
 var express = require('express');
 var app = express();
 var config = require('./config01.json');
+var passport = require('passport');
+var FacebookStrategy = require('passport-facebook').Strategy;
+
+
+
+
+
 
 app.use(allowCrossDomain);
 
