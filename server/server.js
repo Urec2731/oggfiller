@@ -6,6 +6,10 @@ var app = express();
 var config = require('./config01.json');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
+//var bodyParser = require('body-parser');
+//var methodOverride = require('method-override');
+//var path = require('path');
+var multer = require('multer');
 
 
 
@@ -13,6 +17,26 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 app.set('view engine', 'jade');
 
 app.use(allowCrossDomain);
+app.use(multer({ dest: './tmp/'}));
+//app.use(bodyParser({ uploadDir: path.join(__dirname, 'files'), keepExtensions: true }));
+//app.use(bodyParser({ uploadDir: '~/WebstormProjects/oggfiller'.join(__dirname, 'files'), keepExtensions: true }));
+//app.use(methodOverride());
+
+
+
+app.post('/fileupload', function (req, res) {
+    console.log(req.files);
+    res.send('ok');
+});
+
+
+//
+//app.post('/todo/create', function (req, res) {
+//    // TODO: move and rename the file using req.files.path & .name)
+//    res.send(console.dir(req.files));  // DEBUG: display available fields
+//   // res.send('<li>One</li><li>Two</li><li>Three</li>');
+//
+//});
 
 app.get('/ads', function (req, res) {
 
