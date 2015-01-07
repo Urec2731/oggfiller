@@ -4,6 +4,7 @@
   "description": "small-ogg-file-server",
   "devDependencies": {
     "express": "^4.10.6",
+    "jade": "^1.8.2",
     "mongoose": "^3.8.21",
     "passport": "^0.2.1",
     "passport-facebook": "^1.0.3"

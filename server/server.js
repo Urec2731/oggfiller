@@ -10,14 +10,16 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 
 
 
-
+app.set('view engine', 'jade');
 
 app.use(allowCrossDomain);
 
 app.get('/ads', function (req, res) {
-    setTimeout(function () {
-        res.send('<li>One</li><li>Two</li><li>Three</li>');
-    }, 3000);
+
+        //res.send('<li>One</li><li>Two</li><li>Three</li>');
+
+        res.render('aaa');
+
 });
 
 app.get('/contacts', function (req, res) {
