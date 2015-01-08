@@ -8,13 +8,32 @@ var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 var Busboy = require('busboy');
 var fs = require('fs');
-//var bodyParser = require('body-parser');
-//var methodOverride = require('method-override');
+var ffmpeg = require('fluent-ffmpeg');
+//var mongo = require('mongodb');
+var Grid = require('gridfs-stream');
 var path = require('path');
-//var utils = require('utils');
+
+var mongoose = require('mongoose');
+Grid.mongo = mongoose.mongo;
+mongoose.connect('mongodb://localhost/MUSDB');
+
+var conn = mongoose.connection;
+//conn.once('open', function () {
+//    var gfs = Grid(conn.db, mongoose.mongo);
+//
+//    // all set!
+//});
+
+
+
+
 
 
 //var multer = require('multer');
+// create or use an existing mongodb-native db instance
+//var db = new mongo.Db('MUSDB', new mongo.Server("127.0.0.1", 27017));
+//var gfs = Grid(db, mongo);
+var gfs = Grid(conn.db, mongoose.mongo);
 
 
 
@@ -31,6 +50,8 @@ app.post('/fileupload', function(req, res, next){
 
     var busboy = new Busboy({ headers: req.headers });
 
+
+
     // handle text field data (code taken from multer.js)
     busboy.on('field', function(fieldname, val, valTruncated, keyTruncated) {
         if (req.body.hasOwnProperty(fieldname)) {
@@ -46,7 +67,7 @@ app.post('/fileupload', function(req, res, next){
     });
 
     busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-        var self = {};console.dir(mimetype.split('/')[0]==='audio');
+        var self = {};console.dir(mimetype.split('/'));
 
         tmpUploadPath = path.join(__dirname, "./tmp/uploads/", filename);
         targetPath = path.join(__dirname, "./tmp/userpics/", filename);
@@ -58,11 +79,24 @@ app.post('/fileupload', function(req, res, next){
         var re = /(?:\.([^.]+))?$/;
         var cleanFilename = filename.toString().replace(/\.[^/.]+$/, "");
         var fileExtension = re.exec(filename.toString())[1];
-        console.dir(cleanFilename+fileExtension );
+        console.dir(cleanFilename+'.'+fileExtension );
+        var newFilename = cleanFilename || 'noname';
+            newFilename += '.ogg';
+        //tmpUploadPath2 = path.join(__dirname, "./tmp/uploads/", newFilename);
 
 
 
+        if ((mimetype.split('/')[0]==='audio') || (mimetype.split('/')[0]==='video')) {
+            var writestream = gfs.createWriteStream({
+                filename: newFilename
+            });
 
+
+
+            ffmpeg(file).noVideo().format('ogg').stream()
+                .pipe(writestream);                                                         // noVideo нельзя убирать, mp3 файлы с картинками будут глючить
+        }
+        else
         file.pipe(fs.createWriteStream(tmpUploadPath));
     });
 
