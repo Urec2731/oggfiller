@@ -4,12 +4,17 @@
   "description": "small-ogg-file-server",
   "devDependencies": {
     "body-parser": "^1.10.1",
+    "busboy": "^0.2.9",
     "express": "^4.10.6",
+    "fluent-ffmpeg": "^2.0.0-rc3",
     "jade": "^1.8.2",
     "method-override": "^2.3.1",
     "mongoose": "^3.8.21",
     "multer": "^0.1.6",
     "passport": "^0.2.1",
-    "passport-facebook": "^1.0.3"
+    "passport-facebook": "^1.0.3",
+    "stream-body-parser": "0.0.1",
+    "stream-transcoder": "0.0.5",
+    "utils": "0.0.2"
   }
 }
