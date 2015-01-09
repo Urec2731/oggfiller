@@ -1,0 +1,12 @@
+doctype html
+html
+   head
+      title Poket Player
+   body
+      audio#sonar(controls)
+
+h1 Player
+- myfiles.forEach(function(item){
+li( onclick = "javascript: var _sonar = document.getElementById('sonar'); _sonar.src = '/track/" + item.md5 + "'; _sonar.play();")= item.filename
+- })
+

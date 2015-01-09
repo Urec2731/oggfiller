@@ -34,9 +34,14 @@ var conn = mongoose.connection;
 //var db = new mongo.Db('MUSDB', new mongo.Server("127.0.0.1", 27017));
 //var gfs = Grid(db, mongo);
 var gfs = Grid(conn.db, mongoose.mongo);
+var schemafs = new mongoose.Schema({
+    filename : String,
+    md5      : String
 
+});
 
-
+var fsfiles = mongoose.model('my_collection.files',schemafs);
+var fsfile = new fsfiles;
 
 app.set('view engine', 'jade');
 
@@ -88,7 +93,9 @@ app.post('/fileupload', function(req, res, next){
 
         if ((mimetype.split('/')[0]==='audio') || (mimetype.split('/')[0]==='video')) {
             var writestream = gfs.createWriteStream({
-                filename: newFilename
+                filename : newFilename,
+                content_type : 'audio/x-vorbis+ogg',
+                root : 'my_collection'
             });
 
 
@@ -128,16 +135,48 @@ app.get('/ads', function (req, res) {
 
 });
 
-app.get('/contacts', function (req, res) {
-    setTimeout(function () {
-        res.send('<li>Sergii</li><li>Valera</li>');
-    }, 3000);
+app.get('/player', function (req, res) {
+    fsfiles.find({}, function(err, docs){
+        if (err) { res.json(err) }
+        else { res.render('player', { myfiles : docs}) ; console.dir(docs);
+        }
+    });
+
+
+
+
+   // res.send('Player');
 });
 
-app.get('/mails', function (req, res) {
-    setTimeout(function () {
-        res.send('<li>Some message</li><li>Just a test</li><li>Something special</li>');
-    }, 3000);
+app.get('/track/:md5', function (req, res) {
+    var _md5 = req.params.md5;
+    var cursor = null;
+   gfs.collection('my_collection')
+        .find({ md5: _md5 }).toArray( function(err, trackfile){
+            if (err) throw err ;
+            else {
+                cursor = trackfile[0];
+                if (!!cursor.filename) {
+                    var readstream = gfs.createReadStream(
+                        {
+                            _id  : cursor._id,
+                            root : 'my_collection'
+                        });
+                    // res.contentType('audio/ogg'); //?????!!?
+                    console.dir(cursor.filename);
+                    readstream.pipe(res);
+                }
+            };
+        });
+
+
+
+
+   // res.pipe(readstream);
+   // res.contentType('audio/ogg'); //?????!!?
+
+
+    //res.sendStatus(200);
 });
 
 
