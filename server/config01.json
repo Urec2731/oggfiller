@@ -1,6 +1,7 @@
 {
     "facebook": {
-        "id": "Facebook App Id",
-        "secret": "Facebook App Secret"
+        "clientID": "small_ogg_file_server",
+        "clientSecret": "own_Facebook_App_Secret",
+        "callbackURL": "http://localhost:3000/auth/facebook/callback"
     }
 }

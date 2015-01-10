@@ -5,11 +5,13 @@
   "devDependencies": {
     "busboy": "^0.2.9",
     "express": "^4.10.6",
+    "express-session": "^1.10.1",
     "fluent-ffmpeg": "^2.0.0-rc3",
     "gridfs-stream": "^0.5.3",
     "jade": "^1.8.2",
     "mongodb": "^1.4.28",
     "mongoose": "^3.8.21",
+    "mongoose-session": "0.0.3",
     "multer": "^0.1.6",
     "passport": "^0.2.1",
     "passport-facebook": "^1.0.3"
