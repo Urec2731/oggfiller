@@ -105,7 +105,7 @@ passport.serializeUser(function(user, done) {
 });
 passport.deserializeUser(function(id, done) {
     User.findById(id, function(err, user){
-        console.log(user)
+        console.log(user);
         if(!err) done(null, user);
         else done(err, null)
     })
@@ -137,9 +137,16 @@ app.get('/', function (req, res) {
 
 app.get('/login', function (req, res) {
 
-   res.send('<h1>  not realized yet </h1>');
+   res.send('<h1>  not realised yet </h1>');
    // res.render('login_incorrect');
 
+});
+
+
+
+app.get('/logout', function(req, res){
+    req.logout(); //res.send('logout');
+     res.redirect('/');
 });
 
 
@@ -176,7 +183,7 @@ app.post('/fileupload', function(req, res, next){
     busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
         var self = {};console.dir(mimetype.split('/'));
 
-        tmpUploadPath = path.join(__dirname, "./tmp/uploads/", filename);
+        tmpUploadPath = path.join(__dirname, "./uploads/", filename);
         targetPath = path.join(__dirname, "./tmp/userpics/", filename);
 
         self.imageName = filename;
@@ -228,8 +235,6 @@ app.post('/fileupload3333', function (req, res) {
 //   // res.send('<li>One</li><li>Two</li><li>Three</li>');
 //
 //});
-
-
 
 
 
