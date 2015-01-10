@@ -123,20 +123,22 @@ app.get('/auth/facebook', passport.authenticate('facebook'));
 // access was granted, the user will be logged in.  Otherwise,
 // authentication has failed.
 app.get('/auth/facebook/callback',
-    passport.authenticate('facebook', { successRedirect: '/logined',
-        failureRedirect: '/login_incorrect' }));
+    passport.authenticate('facebook', { successRedirect: '/',
+        failureRedirect: '/login' }));
 
 //-----------------------------------------------------
 
-app.get('/logined', function (req, res) {
 
-    res.render('logined');
-
+app.get('/', function (req, res) {
+    res.render(!!req.user ? "user" : "guest", { user: req.user });
 });
 
-app.get('/login_incorrect', function (req, res) {
 
-    res.render('login_incorrect');
+
+app.get('/login', function (req, res) {
+
+   res.send('<h1>  not realized yet </h1>');
+   // res.render('login_incorrect');
 
 });
 
@@ -227,6 +229,10 @@ app.post('/fileupload3333', function (req, res) {
 //
 //});
 
+
+
+
+
 app.get('/ads', function (req, res) {
 
         //res.send('<li>One</li><li>Two</li><li>Three</li>');
@@ -236,17 +242,20 @@ app.get('/ads', function (req, res) {
 });
 
 app.get('/player', function (req, res) {
-    fsfiles.find({}, function(err, docs){
-        if (err) { res.json(err) }
-        else { res.render('player', { myfiles : docs}) ; console.dir(docs);
-        }
-    });
 
+    if (!!req.user) {
+        fsfiles.find({}, function(err, docs){
+            if (err) {
+                res.json(err)
+            }
+            else {
+                res.render('player', { myfiles : docs}) ; console.dir(docs);
+            }
+        });
+    } else
+        res.sendStatus(401);  //401 Access Denied
 
-
-
-   // res.send('Player');
-});
+});  // render('Player');
 
 app.get('/track/:md5', function (req, res) {
     var _md5 = req.params.md5;

@@ -1,3 +1,4 @@
 server/node_modules/
 server/tmp/*
+server/config01.json
 .idea/
