@@ -1,4 +1,11 @@
 //
    Created by urec on 10.01.15.
+div
+   audio#sonar(controls)
+   |  inset code of track in the input
+   input#track_code(type = "text")
+   button(type = "button" onclick = "javascript: var _code = document.getElementById('track_code'); var _sonar = document.getElementById('sonar'); _sonar.src = '/track/' + _code.value; _sonar.play();")
+      | Listen
+
 h1 guest.jade
 a(href="/auth/facebook") Login with Facebook

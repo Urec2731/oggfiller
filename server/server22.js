@@ -7,6 +7,7 @@ var config = require('./config01.json');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 var Busboy = require('busboy');
+var crypto = require('crypto');
 var fs = require('fs');
 var ffmpeg = require('fluent-ffmpeg');
 //var mongo = require('mongodb');
@@ -18,11 +19,6 @@ Grid.mongo = mongoose.mongo;
 mongoose.connect('mongodb://localhost/MUSDB');
 
 var conn = mongoose.connection;
-//conn.once('open', function () {
-//    var gfs = Grid(conn.db, mongoose.mongo);
-//
-//    // all set!
-//});
 
 
 // create a user model
@@ -35,19 +31,20 @@ var User = mongoose.model('User', {
 
 
 //var multer = require('multer');
-// create or use an existing mongodb-native db instance
-//var db = new mongo.Db('MUSDB', new mongo.Server("127.0.0.1", 27017));
-//var gfs = Grid(db, mongo);
+
 var gfs = Grid(conn.db, mongoose.mongo);
 var schemafs = new mongoose.Schema({
     filename : String,
-    md5      : String
+    md5      : String,
+    aliases  : String
 
 });
 
 var fsfiles = mongoose.model('my_collection.files',schemafs);
 
 app.set('view engine', 'jade');
+
+app.use(allowCrossDomain);
 
 app.use(require('express-session')({
     key: 'session',
@@ -60,11 +57,9 @@ app.use(require('express-session')({
 app.use(passport.initialize());
 app.use(passport.session());
 
-//app.use(allowCrossDomain);
+//
     //  app.use(multer({ dest: './tmp/'}));
-//app.use(bodyParser({ uploadDir: path.join(__dirname, 'files'), keepExtensions: true }));
-//app.use(bodyParser({ uploadDir: '~/WebstormProjects/oggfiller'.join(__dirname, 'files'), keepExtensions: true }));
-//app.use(methodOverride());
+
 
 // config passport
 passport.use(new FacebookStrategy({
@@ -162,14 +157,6 @@ app.get('/logout', function(req, res){
 });
 
 
-/*
-app.get('/auth/facebook/callback',
-    passport.authenticate('facebook', { failureRedirect: '' }),
-    function(req, res) {
-        res.redirect('/account');
-    });
-
-*/
 
 
 app.post('/fileupload', ensureAuthenticated, function(req, res, next){
@@ -208,12 +195,14 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 
         if ((mimetype.split('/')[0]==='audio') || (mimetype.split('/')[0]==='video')) {
+            var random_string = fieldname + filename + Date.now() + Math.random();
             var writestream = gfs.createWriteStream({
                 filename : newFilename,
                 mode     : 'w',                      // default value: w+, possible options: w, w+ or r, see [GridStore](http://mongodb.github.com/node-mongodb-native/api-generated/gridstore.html)
                 content_type : 'audio/x-vorbis+ogg', // For content_type to work properly, set "mode"-option to "w" too!
                 root : 'my_collection',
-                metadata: { oauthID : req.user.oauthID }
+                metadata : { oauthID : req.user.oauthID },
+                aliases  : crypto.createHash('md5').update(random_string).digest('hex')
             });
             //console.dir(typeof req.user.oauthID);
 
@@ -242,20 +231,18 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 app.get('/ads', ensureAuthenticated, function (req, res) {
 
-        //res.send('<li>One</li><li>Two</li><li>Three</li>');
-
         res.render('aaa');
 
 });
 
 app.get('/player', ensureAuthenticated, function (req, res) {
 
-        fsfiles.find({ metadata: { oauthID : req.user.oauthID } }, function(err, docs){
+        fsfiles.find({ metadata: { oauthID : req.user.oauthID } }, function(err, thefiles){
             if (err) {
                 res.json(err)
             }
             else {
-                res.render('player', { myfiles : docs}) ; console.dir(docs);
+                res.render('player', { myfiles : thefiles}) ; console.dir(thefiles);
             }
         });
 
@@ -264,32 +251,37 @@ app.get('/player', ensureAuthenticated, function (req, res) {
 app.get('/track/:md5', function (req, res) {
     var _md5 = req.params.md5;
     var cursor = null;
+    var findOptions = req.isAuthenticated() ?
+        {
+            md5: _md5,
+            metadata: {
+                oauthID: req.user.oauthID
+            }
+        } : { aliases : _md5 };
+
    gfs.collection('my_collection')
-        .find({ md5: _md5 }).toArray( function(err, trackfile){
+        .find(findOptions).toArray( function(err, trackfile){
             if (err) throw err ;
             else {
                 cursor = trackfile[0];
-                if (!!cursor.filename) {
+                if (!!cursor) {
                     var readstream = gfs.createReadStream(
                         {
                             _id  : cursor._id,
                             root : 'my_collection'
                         });
-                    // res.contentType('audio/ogg'); //?????!!?
-                    console.dir(cursor.filename);
+                    //console.dir(cursor.filename);
                     readstream.pipe(res);
-                }
-            };
+                } else res.sendStatus(404);
+            }
         });
 
 
 
 
-   // res.pipe(readstream);
-   // res.contentType('audio/ogg'); //?????!!?
 
 
-    //res.sendStatus(200);
+
 });
 
 

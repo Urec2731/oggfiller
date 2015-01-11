@@ -5,8 +5,14 @@ html
    body
       audio#sonar(controls)
 
-h1 Player
-- myfiles.forEach(function(item){
-li( onclick = "javascript: var _sonar = document.getElementById('sonar'); _sonar.src = '/track/" + item.md5 + "'; _sonar.play();")= item.filename
-- })
+      h1 Player
+      ul
+         | click on the track name to play
+         br
+         br
+         - myfiles.forEach(function(item){
+         li( onclick = "javascript: var _sonar = document.getElementById('sonar'); _sonar.src = '/track/" + item.md5 + "'; _sonar.play();")= item.filename
+         li  link for friend: #{item.aliases}
+         br
+         - })
 
