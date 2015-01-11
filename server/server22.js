@@ -10,7 +10,6 @@ var Busboy = require('busboy');
 var crypto = require('crypto');
 var fs = require('fs');
 var ffmpeg = require('fluent-ffmpeg');
-//var mongo = require('mongodb');
 var Grid = require('gridfs-stream');
 var path = require('path');
 
