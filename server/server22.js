@@ -82,7 +82,7 @@ passport.use(new FacebookStrategy({
                     if(err) {
                         console.log(err);
                     } else {
-                        console.log("saving user ...");
+                        //console.log("saving user ...");
                         done(null, user);
                     };
                 });
@@ -95,12 +95,12 @@ passport.use(new FacebookStrategy({
 
 // serialize and deserialize
 passport.serializeUser(function(user, done) {
-    console.log('serializeUser: ' + user._id)
+    //console.log('serializeUser: ' + user._id)
     done(null, user._id);
 });
 passport.deserializeUser(function(id, done) {
     User.findById(id, function(err, user){
-        console.log(user);
+        //console.log(user);
         if(!err) done(null, user);
         else done(err, null)
     })
@@ -242,7 +242,7 @@ app.get('/player', ensureAuthenticated, function (req, res) {
                 res.json(err)
             }
             else {
-                res.render('player', { myfiles : thefiles}) ; console.dir(thefiles);
+                res.render('player', { myfiles : thefiles}) ; //console.dir(thefiles);
             }
         });
 
