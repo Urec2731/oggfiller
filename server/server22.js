@@ -128,6 +128,18 @@ app.get('/auth/facebook/callback',
 
 //-----------------------------------------------------
 
+// test authentication
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/')
+}
+
+
+
+//-----------------------------------------------------
+
 
 app.get('/', function (req, res) {
     res.render(!!req.user ? "user" : "guest", { user: req.user });
@@ -160,14 +172,14 @@ app.get('/auth/facebook/callback',
 */
 
 
-app.post('/fileupload', function(req, res, next){
+app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
     var busboy = new Busboy({ headers: req.headers });
 
 
 
     // handle text field data (code taken from multer.js)
-    busboy.on('field', function(fieldname, val, valTruncated, keyTruncated) {
+    busboy.on('field', function(fieldname, val) { //, valTruncated, keyTruncated) {
         if (req.body.hasOwnProperty(fieldname)) {
             if (Array.isArray(req.body[fieldname])) {
                 req.body[fieldname].push(val);
@@ -176,36 +188,34 @@ app.post('/fileupload', function(req, res, next){
             }
         } else {
             req.body[fieldname] = val;
-            console.log(req.body);
+            //console.log(req.body);
         }
     });
 
     busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-        var self = {};console.dir(mimetype.split('/'));
+                    //console.dir(mimetype.split('/'));
 
-        tmpUploadPath = path.join(__dirname, "./uploads/", filename);
-        targetPath = path.join(__dirname, "./tmp/userpics/", filename);
-
-        self.imageName = filename;
-        self.imageUrl = filename;
+        var tmpUploadPath = path.join(__dirname, "./uploads/", filename);
 
 
-        var re = /(?:\.([^.]+))?$/;
+
         var cleanFilename = filename.toString().replace(/\.[^/.]+$/, "");
-        var fileExtension = re.exec(filename.toString())[1];
-        console.dir(cleanFilename+'.'+fileExtension );
         var newFilename = cleanFilename || 'noname';
             newFilename += '.ogg';
-        //tmpUploadPath2 = path.join(__dirname, "./tmp/uploads/", newFilename);
+
+
 
 
 
         if ((mimetype.split('/')[0]==='audio') || (mimetype.split('/')[0]==='video')) {
             var writestream = gfs.createWriteStream({
                 filename : newFilename,
-                content_type : 'audio/x-vorbis+ogg',
-                root : 'my_collection'
+                mode     : 'w',                      // default value: w+, possible options: w, w+ or r, see [GridStore](http://mongodb.github.com/node-mongodb-native/api-generated/gridstore.html)
+                content_type : 'audio/x-vorbis+ogg', // For content_type to work properly, set "mode"-option to "w" too!
+                root : 'my_collection',
+                metadata: { oauthID : req.user.oauthID }
             });
+            //console.dir(typeof req.user.oauthID);
 
 
 
@@ -216,29 +226,21 @@ app.post('/fileupload', function(req, res, next){
         file.pipe(fs.createWriteStream(tmpUploadPath));
     });
 
-    req.pipe(busboy); // start piping the data.
+
+
+        req.pipe(busboy); // start piping the data.
                                                 res.send('oooooook');
-    console.log(req.body) // outputs nothing, evaluated before busboy.on('field')
+
+     console.log(req.body); // outputs nothing, evaluated before busboy.on('field')
                           // has completed.
 });
 
-app.post('/fileupload3333', function (req, res) {
-    console.log(req.files);
-    res.send('ok');
-});
-
-
-//
-//app.post('/todo/create', function (req, res) {
-//    // TODO: move and rename the file using req.files.path & .name)
-//    res.send(console.dir(req.files));  // DEBUG: display available fields
-//   // res.send('<li>One</li><li>Two</li><li>Three</li>');
-//
-//});
 
 
 
-app.get('/ads', function (req, res) {
+
+
+app.get('/ads', ensureAuthenticated, function (req, res) {
 
         //res.send('<li>One</li><li>Two</li><li>Three</li>');
 
@@ -246,10 +248,9 @@ app.get('/ads', function (req, res) {
 
 });
 
-app.get('/player', function (req, res) {
+app.get('/player', ensureAuthenticated, function (req, res) {
 
-    if (!!req.user) {
-        fsfiles.find({}, function(err, docs){
+        fsfiles.find({ metadata: { oauthID : req.user.oauthID } }, function(err, docs){
             if (err) {
                 res.json(err)
             }
@@ -257,8 +258,6 @@ app.get('/player', function (req, res) {
                 res.render('player', { myfiles : docs}) ; console.dir(docs);
             }
         });
-    } else
-        res.sendStatus(401);  //401 Access Denied
 
 });  // render('Player');
 
