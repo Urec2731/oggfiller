@@ -143,7 +143,7 @@ app.get('/', function (req, res) {
 
 app.get('/login', function (req, res) {
 
-   res.send('<h1>  not realised yet </h1>');
+   res.send('<h1>  not realized yet </h1>');
    // res.render('login_incorrect');
 
 });
@@ -217,9 +217,10 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 
         req.pipe(busboy); // start piping the data.
-                                                res.send('oooooook');
+                                               // res.render('uploaded'); // наверно здесь рендерить нельзя только редирект if (err) res.redirect('uploadfalse');
+                                                res.redirect('/');
 
-     console.log(req.body); // outputs nothing, evaluated before busboy.on('field')
+     //console.log(req.body); // outputs nothing, evaluated before busboy.on('field')
                           // has completed.
 });
 
@@ -228,9 +229,9 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 
 
-app.get('/ads', ensureAuthenticated, function (req, res) {
+app.get('/add', ensureAuthenticated, function (req, res) {
 
-        res.render('aaa');
+        res.render('uploadform');
 
 });
 
