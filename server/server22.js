@@ -13,6 +13,9 @@ var ffmpeg = require('fluent-ffmpeg');
 var Grid = require('gridfs-stream');
 var path = require('path');
 
+
+
+
 var mongoose = require('mongoose');
 Grid.mongo = mongoose.mongo;
 mongoose.connect('mongodb://localhost/MUSDB');
@@ -55,6 +58,8 @@ app.use(require('express-session')({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+
 
 //
     //  app.use(multer({ dest: './tmp/'}));
@@ -178,7 +183,7 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
         }
     });
 
-    var transcodingError = null;
+   // var transcodingError = null;
 
     busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
                     //console.dir(mimetype.split('/'));
@@ -209,7 +214,7 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 
 
-
+/*
             writestream.once('close', function (file) {
                 // do something with `file`
                 console.log(file.filename);
@@ -220,10 +225,10 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
                 //});
                 //this.destroy();
                 transcodingError = true;
-            });
+            });*/
 
-            ffmpeg(file).noVideo().format('ogg').stream(writestream , { end : true});
-              //  .pipe(writestream);                                                         // noVideo нельзя убирать, mp3 файлы с картинками будут глючить
+            ffmpeg(file).noVideo().format('ogg').stream()
+                .pipe(writestream);                                                         // noVideo нельзя убирать, mp3 файлы с картинками будут глючить
         }
         else
         file.pipe(fs.createWriteStream(tmpUploadPath));
