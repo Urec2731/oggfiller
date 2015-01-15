@@ -178,6 +178,8 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
         }
     });
 
+    var transcodingError = null;
+
     busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
                     //console.dir(mimetype.split('/'));
 
@@ -207,8 +209,21 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 
 
-            ffmpeg(file).noVideo().format('ogg').stream()
-                .pipe(writestream);                                                         // noVideo нельзя убирать, mp3 файлы с картинками будут глючить
+
+            writestream.once('close', function (file) {
+                // do something with `file`
+                console.log(file.filename);
+               // console.dir(this);
+                //gfs.remove(file._id, function (err) {
+                //    if (err) return handleError(err);
+                //    console.log('success');
+                //});
+                //this.destroy();
+                transcodingError = true;
+            });
+
+            ffmpeg(file).noVideo().format('ogg').stream(writestream , { end : true});
+              //  .pipe(writestream);                                                         // noVideo нельзя убирать, mp3 файлы с картинками будут глючить
         }
         else
         file.pipe(fs.createWriteStream(tmpUploadPath));
@@ -217,7 +232,7 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 
         req.pipe(busboy); // start piping the data.
-                                               // res.render('uploaded'); // наверно здесь рендерить нельзя только редирект if (err) res.redirect('uploadfalse');
+           console.log(transcodingError);                                    // res.render('uploaded'); // наверно здесь рендерить нельзя только редирект if (err) res.redirect('uploadfalse');
                                                 res.redirect('/');
 
      //console.log(req.body); // outputs nothing, evaluated before busboy.on('field')
@@ -242,7 +257,7 @@ app.get('/player', ensureAuthenticated, function (req, res) {
                 res.json(err)
             }
             else {
-                res.render('player', { myfiles : thefiles}) ; //console.dir(thefiles);
+                res.render('player', { myfiles : thefiles}) ; console.dir(thefiles);
             }
         });
 
