@@ -32,7 +32,8 @@ var User = mongoose.model('User', {
 
 
 
-//var multer = require('multer');
+var transcodeloader = require('./transcodeloader.js');
+var multer = require('multer');
 
 var gfs = Grid(conn.db, mongoose.mongo);
 var schemafs = new mongoose.Schema({
@@ -62,7 +63,16 @@ app.use(passport.session());
 
 
 //
-    //  app.use(multer({ dest: './tmp/'}));
+app.use(transcodeloader({
+    dest: './tmp/uploads',
+    routeUrl : '/testupload',
+    gridfsOptions : {
+        mongo : mongoose.mongo,
+        connection : conn.db,
+        root : 'my_collection'
+    }
+}));
+app.use(multer({ dest: './tmp/'}));    // Back ground loader
 
 
 // config passport
@@ -237,7 +247,7 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 
         req.pipe(busboy); // start piping the data.
-           console.log(transcodingError);                                    // res.render('uploaded'); // наверно здесь рендерить нельзя только редирект if (err) res.redirect('uploadfalse');
+          // console.log(transcodingError);                                    // res.render('uploaded'); // наверно здесь рендерить нельзя только редирект if (err) res.redirect('uploadfalse');
                                                 res.redirect('/');
 
      //console.log(req.body); // outputs nothing, evaluated before busboy.on('field')
@@ -246,6 +256,13 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 
 
+
+app.post('/testupload', ensureAuthenticated, function (req, res) {
+   // console.dir(req.route.path);
+    if (req.files.errAliases.length === 0) { console.log('no transcode err')} else {};
+    res.redirect('/');
+
+});
 
 
 
