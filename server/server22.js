@@ -259,7 +259,28 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 app.post('/testupload', ensureAuthenticated, function (req, res) {
    // console.dir(req.route.path);
-    if (req.files.errAliases.length === 0) { console.log('no transcode err')} else {};
+    if ( req.files.transcodeErrFiles.length === 0) {
+        console.log('no transcode err')
+    }
+    else {
+        console.log('errors detected');
+        req.files.transcodeErrFiles.forEach(function (fileAliase) {
+            gfs.collection('my_collection')
+            .findOne({
+                    aliases  : fileAliase,
+                    metadata: { oauthID : req.user.oauthID }
+                     },
+                function(err, errFile) {
+                    if (err) res.json(err);
+                    else {
+                        console.dir(errFile._id);
+                    }
+
+                });
+
+
+        });
+    }
     res.redirect('/');
 
 });
