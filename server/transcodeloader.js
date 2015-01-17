@@ -45,8 +45,8 @@ module.exports = function(options) {
     req.body = req.body || {};
     req.files = req.files || {};
 
-    req.files.transcodeErrFiles = []; // new option
-    req.files.transcodeErrFileNames = []; // new option
+    req.transcodeErrFiles = []; // new option
+    req.transcodeErrFileNames = []; // new option
 
 
     var gfs = options.hasDatabaseOpt ? Grid(options.gridfsOptions.connection, options.gridfsOptions.mongo) : null;
@@ -143,10 +143,10 @@ module.exports = function(options) {
           var coder = ffmpeg(fileStream)
               .on('error', function (err) {
                // coder.kill();
-                req.files.transcodeErrFiles.push(fileAliases);
-                req.files.transcodeErrFileNames.push(filename);
+                req.transcodeErrFiles.push(fileAliases);
+                req.transcodeErrFileNames.push(filename);
                 /*console.log('aliase', fileAliases);
-                console.log('errFiles', req.files.transcodeErrFiles);
+                console.log('errFiles', req.transcodeErrFiles);
                 //console.dir(writestream.id);
                 console.log('coder error event started');
                 console.dir(err);*/
