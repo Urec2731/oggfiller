@@ -258,13 +258,13 @@ app.post('/fileupload', ensureAuthenticated, function(req, res, next){
 
 
 app.post('/testupload', ensureAuthenticated, function (req, res) {
-   // console.dir(req.route.path);
+
     if ( req.transcodeErrFiles.length === 0) {
-        console.log('no transcode err')
+       // console.log('no transcode err')
     }
     else {
-        console.log('errors detected');
-        req.files.transcodeErrFiles.forEach(function (fileAliase) {
+        //console.log('errors in files detected');
+        req.transcodeErrFiles.forEach(function (fileAliase) {
             gfs.collection('my_collection')
             .findOne({
                     aliases  : fileAliase,
@@ -273,11 +273,10 @@ app.post('/testupload', ensureAuthenticated, function (req, res) {
                 function(err, errFile) {
                     if (err) res.json(err);
                     else {
-                        //console.dir(errFile._id);
                         gfs.collection('my_collection')
                             .remove({_id : errFile._id}, function (err) {
                             if (err) return handleError(err);
-                            console.log('success');
+                            //console.log('success');
                         });
                     }
 
@@ -305,7 +304,7 @@ app.get('/player', ensureAuthenticated, function (req, res) {
                 res.json(err)
             }
             else {
-                res.render('player', { myfiles : thefiles}) ; console.dir(thefiles);
+                res.render('player', { myfiles : thefiles}) ; //console.dir(thefiles);
             }
         });
 

@@ -164,7 +164,10 @@ module.exports = function(options) {
 
 
 
-        } else { // standart behaviour   ?? typos
+        } else { // standart behaviour
+          // ignore this branch of code
+          fileStream.resume(); // new option
+
           var ext, newFilename, newFilePath;
 
           // don't attach to the files object, if there is no file
