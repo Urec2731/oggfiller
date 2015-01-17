@@ -13,6 +13,8 @@ module.exports = function(options) {
   options = options || {};
   options.includeEmptyFields = options.includeEmptyFields || false;
   options.inMemory = options.inMemory || false;
+
+  options.digest = options.digest || 'hex';
   options.routeUrl = options.routeUrl || '/my-upload-route-Url';   // new features in configuration
   options.hasDatabaseOpt = !!options.gridfsOptions || false;
 
@@ -39,9 +41,13 @@ module.exports = function(options) {
     var readFinished = false;
     var fileCount = 0;
 
+
     req.body = req.body || {};
     req.files = req.files || {};
-    req.files.errAliases = [];
+
+    req.files.transcodeErrFiles = []; // new option
+    req.files.transcodeErrFileNames = []; // new option
+
 
     var gfs = options.hasDatabaseOpt ? Grid(options.gridfsOptions.connection, options.gridfsOptions.mongo) : null;
 
@@ -50,7 +56,7 @@ module.exports = function(options) {
         (req.method === 'POST' || req.method === 'PUT') &&
           req.isAuthenticated() &&          // new options
           req.url  === options.routeUrl &&    // new options
-          options.hasDatabaseOpt
+          options.hasDatabaseOpt              // new option
     ) { //console.dir(req.user);  // main loop
 
       if (options.onParseStart) { options.onParseStart(); }
@@ -86,8 +92,11 @@ module.exports = function(options) {
         if (true) { // transcode behaviour
 
 
-         // var tmpUploadPath = path.join(__dirname, "./uploads/", filename);       // dir ./uploads must be exist
+          // don't attach to the files object, if there is no file
+          if (!filename) return fileStream.resume();
 
+          // defines is processing a new file
+          fileCount++;
 
 
           var cleanFilename = filename.toString().replace(/\.[^/.]+$/, "");
@@ -100,17 +109,23 @@ module.exports = function(options) {
 
 
           var random_string = fieldname + filename + Date.now() + Math.random();
+          var fileAliases = crypto.createHash('md5').update(random_string).digest(options.digest);
+
           var writestream = gfs.createWriteStream({
             filename : newFilename,
             mode     : 'w',                      // default value: w+, possible options: w, w+ or r, see [GridStore](http://mongodb.github.com/node-mongodb-native/api-generated/gridstore.html)
             content_type : 'audio/x-vorbis+ogg', // For content_type to work properly, set "mode"-option to "w" too!
             root : options.gridfsOptions.root,
             metadata : { oauthID : req.user.oauthID },
-            aliases  : crypto.createHash('md5').update(random_string).digest('hex')
+            aliases  : fileAliases
           });
           //console.dir(typeof req.user.oauthID);
 
-
+          writestream.on('close', function () {
+            // defines has completed processing one more file
+            fileCount--;
+            onFinish();
+          });
 
           /*
            writestream.once('close', function (file) {
@@ -125,7 +140,26 @@ module.exports = function(options) {
            transcodingError = true;
            });*/
 
-          ffmpeg(fileStream).noVideo().format('ogg').stream()
+          var coder = ffmpeg(fileStream)
+              .on('error', function (err) {
+               // coder.kill();
+                req.files.transcodeErrFiles.push(fileAliases);
+                req.files.transcodeErrFileNames.push(filename);
+                /*console.log('aliase', fileAliases);
+                console.log('errFiles', req.files.transcodeErrFiles);
+                //console.dir(writestream.id);
+                console.log('coder error event started');
+                console.dir(err);*/
+                ////fileStream.resume();
+                //writestream.end();
+                //console.dir(fileStream.resume());
+                //fileStream.unpipe();
+                //fileStream.pipe(writestream);
+                fileStream.resume();
+              })
+              .noVideo()
+              .format('ogg')
+              .stream()
               .pipe(writestream);                                                         // noVideo нельзя убирать, mp3 файлы с картинками будут глючить
 
 
@@ -222,7 +256,7 @@ module.exports = function(options) {
           else
             ws.on('error', onFileStreamError );
 
-        }   // end of standart behaviour ?? typos
+        }   // end of standart behaviour
 
       });
 
