@@ -180,10 +180,10 @@ app.get('/logout', function(req, res){
 app.post('/testupload', ensureAuthenticated, function (req, res) {
 
     if ( req.transcodeErrFiles.length === 0) {
-       // console.log('no transcode err')
+        console.log('no transcode err')
     }
     else {
-        //console.log('errors in files detected');
+        console.log('errors in files detected');
         req.transcodeErrFiles.forEach(function (fileAliase) {
             gfs.collection('my_collection')
             .findOne({

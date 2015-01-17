@@ -89,8 +89,7 @@ module.exports = function(options) {
       // handle files
       busboy.on('file', function(fieldname, fileStream, filename, encoding, mimetype) {
 
-        if (true) /*((mimetype.split('/')[0]==='audio') || (mimetype.split('/')[0]==='video')) */
-        { // transcode behaviour
+        if (true) { // transcode behaviour
 
 
           // don't attach to the files object, if there is no file
@@ -98,6 +97,11 @@ module.exports = function(options) {
 
           // defines is processing a new file
           fileCount++;
+
+
+          // updated to ignore non multimedia files a // new feature
+          if (!((mimetype.split('/')[0]==='audio') ||
+                (mimetype.split('/')[0]==='video'))) { fileCount--; return fileStream.resume() }
 
 
           var cleanFilename = filename.toString().replace(/\.[^/.]+$/, "");
@@ -129,6 +133,9 @@ module.exports = function(options) {
           });
 
 
+          // todo fileStream.on('error' ...
+
+
 
             ffmpeg(fileStream)
               .on('error', function () {
@@ -136,7 +143,7 @@ module.exports = function(options) {
                 req.transcodeErrFiles.push(fileAliases);
                 req.transcodeErrFileNames.push(filename);
 
-                //fileStream.resume();
+                //fileStream.resume();     // kill this line
               })
               .noVideo()
               .format('ogg')
