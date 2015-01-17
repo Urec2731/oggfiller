@@ -89,7 +89,8 @@ module.exports = function(options) {
       // handle files
       busboy.on('file', function(fieldname, fileStream, filename, encoding, mimetype) {
 
-        if (true) { // transcode behaviour
+        if (true) /*((mimetype.split('/')[0]==='audio') || (mimetype.split('/')[0]==='video')) */
+        { // transcode behaviour
 
 
           // don't attach to the files object, if there is no file
@@ -100,8 +101,8 @@ module.exports = function(options) {
 
 
           var cleanFilename = filename.toString().replace(/\.[^/.]+$/, "");
-          var newFilename = cleanFilename || 'noname';
-          newFilename += '.ogg';
+          var newFilenameOgg = cleanFilename || 'noname';
+          newFilenameOgg += '.ogg';
 
 
 
@@ -112,14 +113,14 @@ module.exports = function(options) {
           var fileAliases = crypto.createHash('md5').update(random_string).digest(options.digest);
 
           var writestream = gfs.createWriteStream({
-            filename : newFilename,
+            filename : newFilenameOgg,
             mode     : 'w',                      // default value: w+, possible options: w, w+ or r, see [GridStore](http://mongodb.github.com/node-mongodb-native/api-generated/gridstore.html)
             content_type : 'audio/x-vorbis+ogg', // For content_type to work properly, set "mode"-option to "w" too!
             root : options.gridfsOptions.root,
             metadata : { oauthID : req.user.oauthID },
             aliases  : fileAliases
           });
-          //console.dir(typeof req.user.oauthID);
+
 
           writestream.on('close', function () {
             // defines has completed processing one more file
@@ -127,35 +128,15 @@ module.exports = function(options) {
             onFinish();
           });
 
-          /*
-           writestream.once('close', function (file) {
-           // do something with `file`
-           console.log(file.filename);
-           // console.dir(this);
-           //gfs.remove(file._id, function (err) {
-           //    if (err) return handleError(err);
-           //    console.log('success');
-           //});
-           //this.destroy();
-           transcodingError = true;
-           });*/
 
-          var coder = ffmpeg(fileStream)
-              .on('error', function (err) {
-               // coder.kill();
+
+            ffmpeg(fileStream)
+              .on('error', function () {
+
                 req.transcodeErrFiles.push(fileAliases);
                 req.transcodeErrFileNames.push(filename);
-                /*console.log('aliase', fileAliases);
-                console.log('errFiles', req.transcodeErrFiles);
-                //console.dir(writestream.id);
-                console.log('coder error event started');
-                console.dir(err);*/
-                ////fileStream.resume();
-                //writestream.end();
-                //console.dir(fileStream.resume());
-                //fileStream.unpipe();
-                //fileStream.pipe(writestream);
-                fileStream.resume();
+
+                //fileStream.resume();
               })
               .noVideo()
               .format('ogg')
@@ -165,8 +146,6 @@ module.exports = function(options) {
 
 
         } else { // standart behaviour
-          // ignore this branch of code
-          fileStream.resume(); // new option
 
           var ext, newFilename, newFilePath;
 
