@@ -191,9 +191,7 @@ app.post('/testupload', ensureAuthenticated, function (req, res) {
                 function(err, errFile) {
                     if (err) res.json(err);
                     else {
-                        //gfs.collection('my_collection')
-                        userfiles
-                            .remove({_id : errFile._id}, function (err) {
+                        gfs.remove({_id : errFile._id, root : 'my_collection'}, function (err) {
                             if (err) return handleError(err);
                             //console.log('success');
                         });
@@ -216,6 +214,30 @@ app.get('/add', ensureAuthenticated, function (req, res) {
 
 });
 
+app.get('/remove', ensureAuthenticated, function (req, res) {
+
+    userfiles
+        .find({ metadata: { oauthID : req.user.oauthID } }, function(err, thefiles){
+        if (err) {
+            res.json(err)
+        }
+        else {
+            //console.dir(thefiles);
+            thefiles.forEach(function (item) {
+                gfs//.collection('my_collection')
+                    .remove({_id : item._id, root : 'my_collection'}, function (err) {
+                        if (err) throw err;
+                        console.log('success');
+                    });
+
+            });
+
+
+            res.redirect('/');
+        }
+    });
+
+});  // render
 app.get('/player', ensureAuthenticated, function (req, res) {
 
         userfiles.find({ metadata: { oauthID : req.user.oauthID } }, function(err, thefiles){
