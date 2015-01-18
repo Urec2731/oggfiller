@@ -182,7 +182,7 @@ app.post('/testupload', ensureAuthenticated, function (req, res) {
     else {
         console.log('errors in files detected');
         req.transcodeErrFiles.forEach(function (fileAliase) {
-            //gfs.collection('my_collection')
+
             userfiles
             .findOne({
                     aliases  : fileAliase,

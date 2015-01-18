@@ -8,4 +8,5 @@ var userfiles = mongoose.model('my_collection.files', {
     aliases  : String
 });
 
+//userfiles.remove = function () { throw 'dont use this method in the GridFs collection'};
 module.exports = userfiles;
