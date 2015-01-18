@@ -23,7 +23,7 @@ module.exports = passport.use(new FacebookStrategy({
                     if(err) {
                         console.log(err);
                     } else {
-                        console.log("saving user ...");
+                       // console.log("saving user ...");
                         done(null, user);
                     };
                 });

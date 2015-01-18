@@ -12,7 +12,7 @@ var fs = require('fs');
 var ffmpeg = require('fluent-ffmpeg');
 var Grid = require('gridfs-stream');
 var path = require('path');
-
+var userfiles = require('./userfilesmodel.js');
 
 var config = require('./config01.json');
 var User = require('./usersmodel.js');
@@ -32,14 +32,14 @@ var transcodeloader = require('./transcodeloader.js');
 var multer = require('multer');
 
 var gfs = Grid(conn.db, mongoose.mongo);
-var schemafs = new mongoose.Schema({
-    filename : String,
-    md5      : String,
-    aliases  : String
-
-});
-
-var userfiles = mongoose.model('my_collection.files',schemafs);
+//var schemafs = new mongoose.Schema({
+//    filename : String,
+//    md5      : String,
+//    aliases  : String
+//
+//});
+//
+//var userfiles = mongoose.model('my_collection.files',schemafs);
 
 app.set('view engine', 'jade');
 
@@ -106,12 +106,12 @@ passport.use(new FacebookStrategy({
 
 // serialize and deserialize
 passport.serializeUser(function(user, done) {
-    console.log('serializeUser: ' + user._id)
+   // console.log('serializeUser: ' + user._id)
     done(null, user._id);
 });
 passport.deserializeUser(function(id, done) {
     User.findById(id, function(err, user){
-        console.log(user);
+     //   console.log(user);
         if(!err) done(null, user);
         else done(err, null)
     })
@@ -182,7 +182,8 @@ app.post('/testupload', ensureAuthenticated, function (req, res) {
     else {
         console.log('errors in files detected');
         req.transcodeErrFiles.forEach(function (fileAliase) {
-            gfs.collection('my_collection')
+            //gfs.collection('my_collection')
+            userfiles
             .findOne({
                     aliases  : fileAliase,
                     metadata: { oauthID : req.user.oauthID }
@@ -190,7 +191,8 @@ app.post('/testupload', ensureAuthenticated, function (req, res) {
                 function(err, errFile) {
                     if (err) res.json(err);
                     else {
-                        gfs.collection('my_collection')
+                        //gfs.collection('my_collection')
+                        userfiles
                             .remove({_id : errFile._id}, function (err) {
                             if (err) return handleError(err);
                             //console.log('success');
