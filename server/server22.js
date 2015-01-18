@@ -177,10 +177,10 @@ app.get('/logout', function(req, res){
 app.post('/testupload', ensureAuthenticated, function (req, res) {
 
     if ( req.transcodeErrFiles.length === 0) {
-        console.log('no transcode err')
+        //console.log('no transcode err')
     }
     else {
-        console.log('errors in files detected');
+        //console.log('errors in files detected');
         req.transcodeErrFiles.forEach(function (fileAliase) {
 
             userfiles
@@ -218,26 +218,25 @@ app.get('/remove', ensureAuthenticated, function (req, res) {
 
     userfiles
         .find({ metadata: { oauthID : req.user.oauthID } }, function(err, thefiles){
-        if (err) {
-            res.json(err)
-        }
-        else {
-            //console.dir(thefiles);
-            thefiles.forEach(function (item) {
-                gfs//.collection('my_collection')
-                    .remove({_id : item._id, root : 'my_collection'}, function (err) {
-                        if (err) throw err;
-                        console.log('success');
+            if (err) {
+                res.json(err)
+            }
+            else {
+                //console.dir(thefiles);
+                thefiles.forEach(function (item) {
+                    gfs.remove({_id : item._id, root : 'my_collection'}, function (err) {
+                            if (err) throw err;
+                            //console.log('success');
                     });
 
-            });
+                });
 
 
             res.redirect('/');
-        }
-    });
+            }
+        });
 
-});  // render
+});  // remove
 app.get('/player', ensureAuthenticated, function (req, res) {
 
         userfiles.find({ metadata: { oauthID : req.user.oauthID } }, function(err, thefiles){

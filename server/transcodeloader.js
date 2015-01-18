@@ -100,8 +100,8 @@ module.exports = function(options) {
 
 
           // updated to ignore non multimedia files a // new feature
-          //if (!((mimetype.split('/')[0]==='audio') ||
-          //      (mimetype.split('/')[0]==='video'))) { fileCount--; return fileStream.resume() }
+          if (!((mimetype.split('/')[0]==='audio') ||
+                (mimetype.split('/')[0]==='video'))) { fileCount--; return fileStream.resume() }
 
 
           var cleanFilename = filename.toString().replace(/\.[^/.]+$/, "");
