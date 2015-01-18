@@ -3,9 +3,9 @@
  */
 var express = require('express');
 var app = express();
-var config = require('./config01.json');
-var passport = require('passport');
-var FacebookStrategy = require('passport-facebook').Strategy;
+
+
+//var FacebookStrategy = require('passport-facebook').Strategy;
 var Busboy = require('busboy');
 var crypto = require('crypto');
 var fs = require('fs');
@@ -14,20 +14,16 @@ var Grid = require('gridfs-stream');
 var path = require('path');
 
 
-
-
+var config = require('./config01.json');
+var User = require('./usersmodel.js');
 var mongoose = require('mongoose');
+var passport = require('passport');
+var auth = require('./authentication.js');
 Grid.mongo = mongoose.mongo;
 mongoose.connect('mongodb://localhost/MUSDB');
 
 var conn = mongoose.connection;
 
-
-// create a user model
-var User = mongoose.model('User', {
-    oauthID: Number,
-    name: String
-});
 
 
 
@@ -43,7 +39,7 @@ var schemafs = new mongoose.Schema({
 
 });
 
-var fsfiles = mongoose.model('my_collection.files',schemafs);
+var userfiles = mongoose.model('my_collection.files',schemafs);
 
 app.set('view engine', 'jade');
 
@@ -76,6 +72,7 @@ app.use(multer({ dest: './tmp/'}));    // Back ground loader
 
 
 // config passport
+/*
 passport.use(new FacebookStrategy({
         clientID: config.facebook.clientID,
         clientSecret: config.facebook.clientSecret,
@@ -105,16 +102,16 @@ passport.use(new FacebookStrategy({
     }
 ));
 
-
+*/
 
 // serialize and deserialize
 passport.serializeUser(function(user, done) {
-    //console.log('serializeUser: ' + user._id)
+    console.log('serializeUser: ' + user._id)
     done(null, user._id);
 });
 passport.deserializeUser(function(id, done) {
     User.findById(id, function(err, user){
-        //console.log(user);
+        console.log(user);
         if(!err) done(null, user);
         else done(err, null)
     })
@@ -219,7 +216,7 @@ app.get('/add', ensureAuthenticated, function (req, res) {
 
 app.get('/player', ensureAuthenticated, function (req, res) {
 
-        fsfiles.find({ metadata: { oauthID : req.user.oauthID } }, function(err, thefiles){
+        userfiles.find({ metadata: { oauthID : req.user.oauthID } }, function(err, thefiles){
             if (err) {
                 res.json(err)
             }
