@@ -10,8 +10,7 @@ var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 
-var config = require('./config01.json');
-var User = require('./usersmodel.js');
+var User = require('./models/usersmodel.js');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var auth = require('./authentication.js');

@@ -1,7 +1,7 @@
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
-var User = require('./usersmodel.js');
-var config = require('./config01.json');
+var User = require('./models/usersmodel.js');
+var config = require('./configs/config01.json');
 
 module.exports = passport.use(new FacebookStrategy({
         clientID: config.facebook.clientID,

@@ -1,4 +1,4 @@
-var userfiles = require('./userfilesmodel.js');
+var userfiles = require('./models/userfilesmodel.js');
 
 
 
