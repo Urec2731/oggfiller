@@ -1,6 +1,6 @@
 server/node_modules/
 server/tmp/*
 server/uploads/*
-server/config01.json
+server/configs/config01.json
 .idea/*
 .idea/

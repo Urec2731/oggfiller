@@ -5,10 +5,6 @@ var express = require('express');
 var app = express();
 
 
-var Busboy = require('busboy');
-var crypto = require('crypto');
-var fs = require('fs');
-var path = require('path');
 
 var User = require('./models/usersmodel.js');
 var mongoose = require('mongoose');
@@ -52,13 +48,10 @@ app.use(transcodeloader({
     dest : './tmp/uploads',
     routeUrl : '/testupload',
     //digest : 'base64',        // bugs detected such as hliwrpHyK5Sgo/K4EL7EJg== hashes
-    gridfsOptions : {
-        mongo : mongoose.mongo,
-        connection : conn.db,
-        root : 'my_collection'
-    }
+    gridfsOptions : gridfsOpt
 }));
-app.use(multer({ dest: './tmp/'}));    // Back ground loader
+
+app.use(multer({ dest: './tmp/'}));    // Background loader
 
 
 
