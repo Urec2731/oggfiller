@@ -6,6 +6,7 @@ var User = mongoose.model('User', {
     oauthID: Number,
     name: String,
     created: Date
+    // todo userHashe
 });
 
 module.exports = User;

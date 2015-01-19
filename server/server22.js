@@ -5,11 +5,10 @@ var express = require('express');
 var app = express();
 
 
-//var FacebookStrategy = require('passport-facebook').Strategy;
 var Busboy = require('busboy');
 var crypto = require('crypto');
 var fs = require('fs');
-var ffmpeg = require('fluent-ffmpeg');
+//var ffmpeg = require('fluent-ffmpeg');    // del me
 var Grid = require('gridfs-stream');
 var path = require('path');
 var userfiles = require('./userfilesmodel.js');
@@ -60,8 +59,9 @@ app.use(passport.session());
 
 //
 app.use(transcodeloader({
-    dest: './tmp/uploads',
+    dest : './tmp/uploads',
     routeUrl : '/testupload',
+    //digest : 'base64',        // bugs detected such as hliwrpHyK5Sgo/K4EL7EJg== hashe
     gridfsOptions : {
         mongo : mongoose.mongo,
         connection : conn.db,

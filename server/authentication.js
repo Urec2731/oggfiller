@@ -18,6 +18,7 @@ module.exports = passport.use(new FacebookStrategy({
                     oauthID: profile.id,
                     name: profile.displayName,
                     created: Date.now()
+                    // todo userHashe
                 });
                 user.save(function(err) {
                     if(err) {
