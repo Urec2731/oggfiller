@@ -8,10 +8,7 @@ var app = express();
 var Busboy = require('busboy');
 var crypto = require('crypto');
 var fs = require('fs');
-//var ffmpeg = require('fluent-ffmpeg');    // del me
-//var Grid = require('gridfs-stream');
 var path = require('path');
-//var userfiles = require('./userfilesmodel.js');
 
 var config = require('./config01.json');
 var User = require('./usersmodel.js');
@@ -19,7 +16,6 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var auth = require('./authentication.js');
 
-//Grid.mongo = mongoose.mongo;
 mongoose.connect('mongodb://localhost/MUSDB');
 
 var conn = mongoose.connection;
@@ -29,7 +25,6 @@ var conn = mongoose.connection;
 var transcodeloader = require('./transcodeloader.js');
 var multer = require('multer');
 
-//var gfs = Grid(conn.db, mongoose.mongo);
 
 app.set('view engine', 'jade');
 
@@ -68,7 +63,7 @@ app.use(multer({ dest: './tmp/'}));    // Back ground loader
 
 
 
-// serialize and deserialize
+// serialize and deserialize user
 passport.serializeUser(function(user, done) {
    // console.log('serializeUser: ' + user._id)
     done(null, user._id);
