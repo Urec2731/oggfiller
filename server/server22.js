@@ -55,7 +55,12 @@ app.use(require('express-session')({
 app.use(passport.initialize());
 app.use(passport.session());
 
-
+//
+var gridfsOpt = {
+    mongo : mongoose.mongo,
+        connection : conn.db,
+        root : 'my_collection'
+};
 
 //
 app.use(transcodeloader({
@@ -174,37 +179,7 @@ app.get('/logout', function(req, res){
 
 
 
-app.post('/testupload', ensureAuthenticated, function (req, res) {
-
-    if ( req.transcodeErrFiles.length === 0) {
-        //console.log('no transcode err')
-    }
-    else {
-        //console.log('errors in files detected');
-        req.transcodeErrFiles.forEach(function (fileAliase) {
-
-            userfiles
-            .findOne({
-                    aliases  : fileAliase,
-                    metadata: { oauthID : req.user.oauthID }
-                     },
-                function(err, errFile) {
-                    if (err) res.json(err);
-                    else {
-                        gfs.remove({_id : errFile._id, root : 'my_collection'}, function (err) {
-                            if (err) return handleError(err);
-                            //console.log('success');
-                        });
-                    }
-
-                });
-
-
-        });
-    }
-    res.redirect('/');
-
-});
+app.post('/testupload', ensureAuthenticated,  require('./upload.js')(gridfsOpt));
 
 
 
@@ -237,54 +212,9 @@ app.get('/remove', ensureAuthenticated, function (req, res) {
         });
 
 });  // remove
-app.get('/player', ensureAuthenticated, function (req, res) {
+app.get('/player', ensureAuthenticated, require('./player.js'));  // render('Player');
 
-        userfiles.find({ metadata: { oauthID : req.user.oauthID } }, function(err, thefiles){
-            if (err) {
-                res.json(err)
-            }
-            else {
-                res.render('player', { myfiles : thefiles}) ; //console.dir(thefiles);
-            }
-        });
-
-});  // render('Player');
-
-app.get('/track/:md5', function (req, res) {
-    var _md5 = req.params.md5;
-    var cursor = null;
-    var findOptions = req.isAuthenticated() ?
-        {
-            md5: _md5,
-            metadata: {
-                oauthID: req.user.oauthID
-            }
-        } : { aliases : _md5 };
-
-   gfs.collection('my_collection')
-        .find(findOptions).toArray( function(err, trackfile){
-            if (err) throw err ;
-            else {
-                cursor = trackfile[0];
-                if (!!cursor) {
-                    var readstream = gfs.createReadStream(
-                        {
-                            _id  : cursor._id,
-                            root : 'my_collection'
-                        });
-                    //console.dir(cursor.filename);
-                    readstream.pipe(res);
-                } else res.sendStatus(404);
-            }
-        });
-
-
-
-
-
-
-
-});
+app.get('/track/:md5', require('./output.js')(gridfsOpt)); // track
 
 
 
