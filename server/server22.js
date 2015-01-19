@@ -9,36 +9,27 @@ var Busboy = require('busboy');
 var crypto = require('crypto');
 var fs = require('fs');
 //var ffmpeg = require('fluent-ffmpeg');    // del me
-var Grid = require('gridfs-stream');
+//var Grid = require('gridfs-stream');
 var path = require('path');
-var userfiles = require('./userfilesmodel.js');
+//var userfiles = require('./userfilesmodel.js');
 
 var config = require('./config01.json');
 var User = require('./usersmodel.js');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var auth = require('./authentication.js');
-Grid.mongo = mongoose.mongo;
+
+//Grid.mongo = mongoose.mongo;
 mongoose.connect('mongodb://localhost/MUSDB');
 
 var conn = mongoose.connection;
 
 
 
-
-
 var transcodeloader = require('./transcodeloader.js');
 var multer = require('multer');
 
-var gfs = Grid(conn.db, mongoose.mongo);
-//var schemafs = new mongoose.Schema({
-//    filename : String,
-//    md5      : String,
-//    aliases  : String
-//
-//});
-//
-//var userfiles = mongoose.model('my_collection.files',schemafs);
+//var gfs = Grid(conn.db, mongoose.mongo);
 
 app.set('view engine', 'jade');
 
@@ -66,7 +57,7 @@ var gridfsOpt = {
 app.use(transcodeloader({
     dest : './tmp/uploads',
     routeUrl : '/testupload',
-    //digest : 'base64',        // bugs detected such as hliwrpHyK5Sgo/K4EL7EJg== hashe
+    //digest : 'base64',        // bugs detected such as hliwrpHyK5Sgo/K4EL7EJg== hashes
     gridfsOptions : {
         mongo : mongoose.mongo,
         connection : conn.db,
@@ -76,38 +67,6 @@ app.use(transcodeloader({
 app.use(multer({ dest: './tmp/'}));    // Back ground loader
 
 
-// config passport
-/*
-passport.use(new FacebookStrategy({
-        clientID: config.facebook.clientID,
-        clientSecret: config.facebook.clientSecret,
-        callbackURL: config.facebook.callbackURL
-    },
-    function(accessToken, refreshToken, profile, done) {
-        User.findOne({ oauthID: profile.id }, function(err, user) {
-            if(err) { console.log(err); }
-            if (!err && user != null) {
-                done(null, user);
-            } else {
-                var user = new User({
-                    oauthID: profile.id,
-                    name: profile.displayName,
-                    created: Date.now()
-                });
-                user.save(function(err) {
-                    if(err) {
-                        console.log(err);
-                    } else {
-                        //console.log("saving user ...");
-                        done(null, user);
-                    };
-                });
-            };
-        });
-    }
-));
-
-*/
 
 // serialize and deserialize
 passport.serializeUser(function(user, done) {
@@ -128,28 +87,10 @@ passport.deserializeUser(function(id, done) {
 //     /auth/facebook/callback
 app.get('/auth/facebook', passport.authenticate('facebook'));
 
-
-// Facebook will redirect the user to this URL after approval.  Finish the
-// authentication process by attempting to obtain an access token.  If
-// access was granted, the user will be logged in.  Otherwise,
-// authentication has failed.
 app.get('/auth/facebook/callback',
     passport.authenticate('facebook', { successRedirect: '/',
         failureRedirect: '/login' }));
 
-//-----------------------------------------------------
-
-// test authentication
-function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect('/')
-}
-
-
-
-//-----------------------------------------------------
 
 
 app.get('/', function (req, res) {
@@ -160,15 +101,15 @@ app.get('/', function (req, res) {
 
 app.get('/login', function (req, res) {
 
-   res.send('<h1>  not realized yet </h1>');
-   // res.render('login_incorrect');
+   res.sendStatus(404);
+
 
 });
 
 
 
 app.get('/logout', function(req, res){
-    req.logout(); //res.send('logout');
+     req.logout();
      res.redirect('/');
 });
 
@@ -182,39 +123,13 @@ app.get('/logout', function(req, res){
 app.post('/testupload', ensureAuthenticated,  require('./upload.js')(gridfsOpt));
 
 
+app.get('/add', ensureAuthenticated, require('./add.js'));
 
-app.get('/add', ensureAuthenticated, function (req, res) {
+app.get('/remove', ensureAuthenticated, require('./remove.js')(gridfsOpt));
 
-        res.render('uploadform');
+app.get('/player', ensureAuthenticated, require('./player.js'));
 
-});
-
-app.get('/remove', ensureAuthenticated, function (req, res) {
-
-    userfiles
-        .find({ metadata: { oauthID : req.user.oauthID } }, function(err, thefiles){
-            if (err) {
-                res.json(err)
-            }
-            else {
-                //console.dir(thefiles);
-                thefiles.forEach(function (item) {
-                    gfs.remove({_id : item._id, root : 'my_collection'}, function (err) {
-                            if (err) throw err;
-                            //console.log('success');
-                    });
-
-                });
-
-
-            res.redirect('/');
-            }
-        });
-
-});  // remove
-app.get('/player', ensureAuthenticated, require('./player.js'));  // render('Player');
-
-app.get('/track/:md5', require('./output.js')(gridfsOpt)); // track
+app.get('/track/:md5', require('./output.js')(gridfsOpt));
 
 
 
@@ -230,3 +145,17 @@ function allowCrossDomain(req, res, next) {
 
     next();
 }
+
+
+
+// test authentication
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/')
+}
+
+
+
+//-----------------------------------------------------

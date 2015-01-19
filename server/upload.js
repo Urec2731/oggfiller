@@ -12,6 +12,8 @@ module.exports = function(gridfsOpt) {
         }
         else {
             //console.log('errors in files detected');
+            //console.dir(req.transcodeErrFileNames);
+
             req.transcodeErrFiles.forEach(function (fileAliase) {
 
                 userfiles
