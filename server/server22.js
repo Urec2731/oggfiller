@@ -9,7 +9,7 @@ var app = express();
 var User = require('./models/usersmodel.js');
 var mongoose = require('mongoose');
 var passport = require('passport');
-var auth = require('./authentication.js');
+var auth = require('./lib/authentication.js');
 
 mongoose.connect('mongodb://localhost/MUSDB');
 
@@ -17,7 +17,7 @@ var conn = mongoose.connection;
 
 
 
-var transcodeloader = require('./transcodeloader.js');
+var transcodeloader = require('./lib/transcodeloader.js');
 var multer = require('multer');
 
 
@@ -107,16 +107,16 @@ app.get('/logout', function(req, res){
 
 
 
-app.post('/testupload', ensureAuthenticated,  require('./upload.js')(gridfsOpt));
+app.post('/testupload', ensureAuthenticated,  require('./lib/upload.js')(gridfsOpt));
 
 
-app.get('/add', ensureAuthenticated, require('./add.js'));
+app.get('/add', ensureAuthenticated, require('./lib/add.js'));
 
-app.get('/remove', ensureAuthenticated, require('./remove.js')(gridfsOpt));
+app.get('/remove', ensureAuthenticated, require('./lib/remove.js')(gridfsOpt));
 
-app.get('/player', ensureAuthenticated, require('./player.js'));
+app.get('/player', ensureAuthenticated, require('./lib/player.js'));
 
-app.get('/track/:md5', require('./output.js')(gridfsOpt));
+app.get('/track/:md5', require('./lib/output.js')(gridfsOpt));
 
 
 
